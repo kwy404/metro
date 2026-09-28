@@ -842,6 +842,30 @@ describe('with package exports resolution enabled', () => {
       });
     });
 
+    test('should skip nested conditions with no match and try later conditions', () => {
+      const context = {
+        ...baseContext,
+        ...createPackageAccessors({
+          '/root/node_modules/test-pkg/package.json': {
+            main: 'index.js',
+            exports: {
+              './foo.js': {
+                'react-native': {import: './lib/foo-react-native.mjs'},
+                default: './lib/foo.js',
+              },
+            },
+          },
+        }),
+        isESMImport: false,
+        unstable_conditionNames: ['react-native'],
+      };
+
+      expect(Resolver.resolve(context, 'test-pkg/foo.js', null)).toEqual({
+        type: 'sourceFile',
+        filePath: '/root/node_modules/test-pkg/lib/foo.js',
+      });
+    });
+
     test('should throw FailedToResolvePathError when no conditions are matched', () => {
       const context = {
         ...baseContext,

@@ -77,7 +77,10 @@ function reduceConditionalExport(
     }
 
     for (const conditionName in reducedValue) {
-      if (conditionNames.has(conditionName)) {
+      if (
+        conditionNames.has(conditionName) &&
+        hasMatchingCondition(reducedValue[conditionName], conditionNames)
+      ) {
         match = reducedValue[conditionName];
         break;
       }
@@ -87,4 +90,24 @@ function reduceConditionalExport(
   }
 
   return reducedValue;
+}
+
+/**
+ * Whether a subpath value resolves for the passed `conditionNames`. Nested
+ * conditions with no match do not, and are skipped so that later conditions
+ * are tried (see `PACKAGE_TARGET_RESOLVE` in the Node.js ESM resolution spec).
+ */
+function hasMatchingCondition(
+  value: Values<ExportsLikeMap>,
+  conditionNames: ReadonlySet<string>,
+): boolean {
+  return (
+    value == null ||
+    typeof value === 'string' ||
+    Object.keys(value).some(
+      conditionName =>
+        conditionNames.has(conditionName) &&
+        hasMatchingCondition(value[conditionName], conditionNames),
+    )
+  );
 }
