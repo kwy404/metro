@@ -24,7 +24,7 @@ type Options<T extends number | string> = Readonly<{
   getRunModuleStatement: (moduleId: T, globalPrefix: string) => string,
   globalPrefix: string,
   inlineSourceMap: ?boolean,
-  processModuleFilter?: (module: Module<>) => boolean,
+  processModuleFilter: (module: Module<>) => boolean,
   runBeforeMainModule: ReadonlyArray<string>,
   runModule: boolean,
   shouldAddToIgnoreList: (Module<>) => boolean,
@@ -74,7 +74,7 @@ export default function getAppendScripts<T extends number | string>(
     const sourceMappingURL = options.inlineSourceMap
       ? getInlineSourceMappingURL(
           sourceMapString(modules, {
-            processModuleFilter: options.processModuleFilter ?? (() => true),
+            processModuleFilter: options.processModuleFilter,
             excludeSource: false,
             shouldAddToIgnoreList: options.shouldAddToIgnoreList,
             getSourceUrl: options.getSourceUrl,
